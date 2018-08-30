@@ -31,7 +31,7 @@ class InputControl extends Rete.Control {
         var input = document.createElement('input');
         el.appendChild(input);
 
-        var text = this.getData(this.key) || "Some message..";
+        var text = this.getData(this.key) || "Ваше сообщение...";
 
         input.value = text;
         this.putData(this.key, text);
@@ -54,8 +54,8 @@ class MessageEventComponent extends Rete.Component {
     }
 
     builder(node) {
-        var out1 = new Rete.Output("Action", actSocket);
-        var out2 = new Rete.Output("Text", strSocket);
+        var out1 = new Rete.Output("Действие", actSocket);
+        var out2 = new Rete.Output("Текст", strSocket);
         return node.addOutput(out1).addOutput(out2);
     }
 
@@ -75,8 +75,8 @@ class MessageSendComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp1 = new Rete.Input("Action", actSocket);
-        var inp2 = new Rete.Input("Text", strSocket);
+        var inp1 = new Rete.Input("Действие", actSocket);
+        var inp2 = new Rete.Input("Текст", strSocket);
 
 
         var ctrl = new InputControl('text');
@@ -102,10 +102,10 @@ class MessageMatchComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp1 = new Rete.Input("Action", actSocket);
-        var inp2 = new Rete.Input("Text", strSocket);
-        var out1 = new Rete.Output("True", actSocket);
-        var out2 = new Rete.Output("False", actSocket);
+        var inp1 = new Rete.Input("Действие", actSocket);
+        var inp2 = new Rete.Input("Текст", strSocket);
+        var out1 = new Rete.Output("Да", actSocket);
+        var out2 = new Rete.Output("Нет", actSocket);
         var ctrl = new InputControl('regexp');
 
         return node
@@ -135,7 +135,7 @@ class MessageComponent extends Rete.Component {
     }
 
     builder(node) {
-        var out = new Rete.Output("Text", strSocket);
+        var out = new Rete.Output("Текст", strSocket);
         var ctrl = new InputControl("text");
 
         return node.addControl(ctrl).addOutput(out);
@@ -198,7 +198,7 @@ editor
                 },
                 "3": {
                     id: 3,
-                    data: {text: "ッ"},
+                    data: {text: "Не понял"},
                     group: null,
                     inputs: [],
                     outputs: [{connections: [{node: 2, input: 1}]}],
@@ -207,7 +207,7 @@ editor
                 },
                 "4": {
                     id: 4,
-                    data: {regexp: ".*hello.*"},
+                    data: {regexp: ".*Привет.*"},
                     group: null,
                     inputs: [
                         {connections: [{node: 1, output: 0}]},
@@ -234,7 +234,7 @@ editor
                 },
                 "6": {
                     id: 6,
-                    data: {text: "Hello!"},
+                    data: {text: "Приветствую!!"},
                     group: null,
                     inputs: [],
                     outputs: [{connections: [{node: 5, input: 1}]}],
@@ -255,6 +255,7 @@ editor
                 console.log('process')
                 await engine.abort();
                 await engine.process(editor.toJSON());
+                console.log(editor.toJSON());
             });
 
             editor.trigger("process");
