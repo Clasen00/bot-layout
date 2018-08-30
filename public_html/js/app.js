@@ -251,7 +251,6 @@ editor
                 console.log('process')
                 await engine.abort();
                 await engine.process(editor.toJSON());
-                console.log(editor.toJSON());
             });
 
             editor.trigger("process");
