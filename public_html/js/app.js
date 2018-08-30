@@ -1,7 +1,3 @@
-var botAvatar =
-        "https://robohash.org/liberovelitdolores.bmp?size=50x50&set=set1";
-var userAvatar =
-        "http://icons.iconarchive.com/icons/visualpharm/must-have/256/User-icon.png";
 
 var onMessageTask = null;
 
@@ -183,64 +179,64 @@ editor
                     ],
                     position: [44, 138],
                     name: "Message event"
-                },
-                "2": {
-                    id: 2,
-                    data: {},
-                    group: null,
-                    inputs: [
-                        {connections: [{node: 4, output: 1}]},
-                        {connections: [{node: 3, output: 0}]}
-                    ],
-                    outputs: [],
-                    position: [673.2072854903905, 194.82554933538893],
-                    name: "Message send"
-                },
-                "3": {
-                    id: 3,
-                    data: {text: "Не понял"},
-                    group: null,
-                    inputs: [],
-                    outputs: [{connections: [{node: 2, input: 1}]}],
-                    position: [334.3043696236001, 298.2715347978209],
-                    name: "Message"
-                },
-                "4": {
-                    id: 4,
-                    data: {regexp: ".*Привет.*"},
-                    group: null,
-                    inputs: [
-                        {connections: [{node: 1, output: 0}]},
-                        {connections: [{node: 1, output: 1}]}
-                    ],
-                    outputs: [
-                        {connections: [{node: 5, input: 0}]},
-                        {connections: [{node: 2, input: 0}]}
-                    ],
-                    position: [333.40730287320383, 22.1000138522662],
-                    name: "Message match"
-                },
-                "5": {
-                    id: 5,
-                    data: {},
-                    group: null,
-                    inputs: [
-                        {connections: [{node: 4, output: 0}]},
-                        {connections: [{node: 6, output: 0}]}
-                    ],
-                    outputs: [],
-                    position: [670.6284575254812, -103.66713461561366],
-                    name: "Message send"
-                },
-                "6": {
-                    id: 6,
-                    data: {text: "Приветствую!!"},
-                    group: null,
-                    inputs: [],
-                    outputs: [{connections: [{node: 5, input: 1}]}],
-                    position: [317.85328833563574, -143.3955998177927],
-                    name: "Message"
                 }
+//                "2": {
+//                    id: 2,
+//                    data: {},
+//                    group: null,
+//                    inputs: [
+//                        {connections: [{node: 4, output: 1}]},
+//                        {connections: [{node: 3, output: 0}]}
+//                    ],
+//                    outputs: [],
+//                    position: [673.2072854903905, 194.82554933538893],
+//                    name: "Message send"
+//                },
+//                "3": {
+//                    id: 3,
+//                    data: {text: "Не понял"},
+//                    group: null,
+//                    inputs: [],
+//                    outputs: [{connections: [{node: 2, input: 1}]}],
+//                    position: [334.3043696236001, 298.2715347978209],
+//                    name: "Message"
+//                },
+//                "4": {
+//                    id: 4,
+//                    data: {regexp: ".*Привет.*"},
+//                    group: null,
+//                    inputs: [
+//                        {connections: [{node: 1, output: 0}]},
+//                        {connections: [{node: 1, output: 1}]}
+//                    ],
+//                    outputs: [
+//                        {connections: [{node: 5, input: 0}]},
+//                        {connections: [{node: 2, input: 0}]}
+//                    ],
+//                    position: [333.40730287320383, 22.1000138522662],
+//                    name: "Message match"
+//                },
+//                "5": {
+//                    id: 5,
+//                    data: {},
+//                    group: null,
+//                    inputs: [
+//                        {connections: [{node: 4, output: 0}]},
+//                        {connections: [{node: 6, output: 0}]}
+//                    ],
+//                    outputs: [],
+//                    position: [670.6284575254812, -103.66713461561366],
+//                    name: "Message send"
+//                },
+//                "6": {
+//                    id: 6,
+//                    data: {text: "Приветствую!!"},
+//                    group: null,
+//                    inputs: [],
+//                    outputs: [{connections: [{node: 5, input: 1}]}],
+//                    position: [317.85328833563574, -143.3955998177927],
+//                    name: "Message"
+//                }
             },
             groups: {}
         })

@@ -25,51 +25,52 @@ body, html {
 .content #editor-wrapper #editor .input-control input {
     width: 140px;
 }
-.content #telegram {
-    margin: 15px;
-    flex: 1;
-    height: calc(100% - 2 * 15px);
-    border: 2px solid blue;
-    background: url("http://78.media.tumblr.com/913fc95846350c30232a5608a322b78e/tumblr_obykzyjxZt1vbllj8o4_1280.png");
-    background-size: cover;
+
+header {
+    height: 60px;
+    background-color: white;
 }
-.content #telegram .messages {
-    height: calc(100% - 80px);
-    max-height: calc(100% - 80px);
-    overflow: auto;
+
+.wrap {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: stretch;
+    align-items: flex-start;
+    width: 100%;
 }
-.content #telegram .messages .message {
-    display: flex;
-    padding: 10px;
+
+.header-link {
+    padding: 1.1em;
 }
-.content #telegram .messages .message.owner {
-    flex-direction: row-reverse;
+
+.header-h1 {
+    padding-left: 1em;
 }
-.content #telegram .messages .message .avatar {
-    display: inline-block;
-    border-radius: 100%;
-    flex-grow: 0;
-    flex-shrink: 0;
-    height: 40px;
-    margin: 0 12px;
-    overflow: hidden;
+
+#header-title {
+    color: #1c5a7d;
 }
-.content #telegram .messages .message .avatar img {
-    height: 40px;
-    width: 40px;
+
+.header-link > a {
+    font-weight: 500;
+    color: #888;
 }
-.content #telegram .messages .message .text-wrap {
-    display: inline-block;
+
+.header-link > a:hover {
+    color: #444;
 }
-.content #telegram .messages .message .text-wrap .text {
-    padding: 5px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
+
+.header-menu-wrapper { 
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
-.content #telegram .messages .message .text-wrap .text a {
-    color: #4f6;
-}
-.content #telegram .form {
-    background: #839aed;
-    height: 80px;
+
+header-h1 {
+    width: 100%;
+    text-align: right;
+    font-size: 26px;
+    float: right;
 }
