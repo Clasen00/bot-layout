@@ -246,13 +246,25 @@ editor
             });
 
             editor.on("process connectioncreated connectionremoved nodecreated", async function () {
-                if (engine.silent)
+                if (engine.silent) {
                     return;
-                console.log('process')
+
+                }
                 await engine.abort();
                 await engine.process(editor.toJSON());
+                getData(editor.toJSON());
             });
 
             editor.trigger("process");
             editor.view.resize();
         });
+
+function getData(data) {
+    const target = document.getElementById('save');
+
+    target.addEventListener("click", e => {
+        e.preventDefault();
+
+        console.log(JSON.stringify(data));
+    }, false);
+}
