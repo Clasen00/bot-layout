@@ -261,10 +261,11 @@ editor
 
 function getData(data) {
     const target = document.getElementById('save');
+    const console = document.getElementById('console');
 
     target.addEventListener("click", e => {
         e.preventDefault();
-
-        console.log(JSON.stringify(data));
+        
+        console.innerHTML = JSON.stringify(data);
     }, false);
 }
