@@ -1,8 +1,8 @@
-
 var onMessageTask = null;
 
 var actSocket = new Rete.Socket("Action");
 var strSocket = new Rete.Socket("String");
+const numSocket = new Rete.Socket('Number value');
 
 const JsRenderPlugin = {
     install(editor, params = {}){
@@ -37,116 +37,79 @@ class InputControl extends Rete.Control {
     }
 }
 
-class MessageEventComponent extends Rete.Component {
+class InitialControl extends Rete.Control {
+    
+    constructor(emitter, key, value, name, text) {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.keyz = Math.random()
+                .toString(36)
+                .substr(2, 9);
+        this.type = "Radio";
+        this.template =
+                '<input id="node_initial" name={{name}} type="radio" :value="value" @click.noprevent.stop="change($event)" /><span style="display: inline-block; min-width: 160px;">{{text}}</span><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-';
 
-    constructor() {
-        super("Message event");
-        this.task = {
-            outputs: ['option', 'output'],
-            init(task) {
-                onMessageTask = task;
-            }
-        }
+        this.scope = {
+            id: this.keyz,
+            value: value,
+            text: text,
+            name: name,
+            change: this.change.bind(this),
+            del_btn: this.del_btn.bind(this)
+        };
+    }
+    change(e) {
+        this.scope.value = +e.target.value;
+        this.update();
     }
 
-    builder(node) {
-        var out1 = new Rete.Output("Действие", actSocket);
-        var out2 = new Rete.Output("Текст", strSocket);
-        return node.addOutput(out1).addOutput(out2);
+    del_btn(e) {
+        var node = this.getNode();
+        var id = e.target.id;
+        removeItem(node.controls, "keyz", id);
+        this.emitter.trigger("process");
+        this.getNode()._alight.scan();
     }
 
-    worker(node, inputs, msg) {
-
-        return [msg];
-    }
-}
-
-class MessageSendComponent extends Rete.Component {
-
-    constructor() {
-        super("Message send");
-        this.task = {
-            outputs: []
-        }
+    update() {
+        if (this.key)
+            this.putData(this.key, this.scope.value);
+        this.emitter.trigger("process");
+        this._alight.scan();
     }
 
-    builder(node) {
-        var inp1 = new Rete.Input("Действие", actSocket);
-        var inp2 = new Rete.Input("Текст", strSocket);
+    mounted() {}
 
-
-        var ctrl = new InputControl('text');
-        inp2.addControl(ctrl);
-
-        return node.addInput(inp1).addInput(inp2);
-    }
-
-    worker(node, inputs) {
-        var text = inputs[0] ? inputs[0][0] : node.data.text; //default text
-        console.log("msg send");
-        receiveUser(text);
-    }
-}
-
-class MessageMatchComponent extends Rete.Component {
-
-    constructor() {
-        super("Message match");
-        this.task = {
-            outputs: ['option', 'option']
-        }
-    }
-
-    builder(node) {
-        var inp1 = new Rete.Input("Действие", actSocket);
-        var inp2 = new Rete.Input("Текст", strSocket);
-        var out1 = new Rete.Output("Да", actSocket);
-        var out2 = new Rete.Output("Нет", actSocket);
-        var ctrl = new InputControl('regexp');
-
-        return node
-                .addControl(ctrl)
-                .addInput(inp1)
-                .addInput(inp2)
-                .addOutput(out1)
-                .addOutput(out2);
-    }
-    worker(node, inputs) {
-        var text = inputs[0] ? inputs[0][0] : "";
-
-        if (!text.match(new RegExp(node.data.regexp, "gi")))
-            this.closed = [0];
-        else
-            this.closed = [1];
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan();
     }
 }
 
-class MessageComponent extends Rete.Component {
+class InitialComponent extends Rete.Component {
 
     constructor() {
-        super("Message");
+        super("Стартовое сообщение");
         this.task = {
             outputs: ['output']
-        }
+        };
     }
 
     builder(node) {
-        var out = new Rete.Output("Текст", strSocket);
+        var out = new Rete.Output("Вариант 1", strSocket);
         var ctrl = new InputControl("text");
-
         return node.addControl(ctrl).addOutput(out);
     }
 
     worker(node, inputs) {
+
         return [node.data.text];
     }
 }
 
 var components = [
-    new MessageEventComponent,
-    new MessageSendComponent,
-    new MessageMatchComponent,
-    new MessageComponent
+    new InitialComponent
 ];
 
 var container = document.getElementById("editor");
@@ -160,8 +123,8 @@ editor.use(TaskPlugin);
 var engine = new Rete.Engine("demo@0.1.0");
 
 components.map(c => {
-    editor.register(c)
-    engine.register(c)
+    editor.register(c);
+    engine.register(c);
 })
 
 editor
@@ -252,20 +215,20 @@ editor
                 }
                 await engine.abort();
                 await engine.process(editor.toJSON());
-                getData(editor.toJSON());
+                getConsoleData(editor.toJSON());
             });
 
             editor.trigger("process");
             editor.view.resize();
         });
 
-function getData(data) {
+function getConsoleData(data) {
     const target = document.getElementById('save');
     const console = document.getElementById('console');
 
     target.addEventListener("click", e => {
         e.preventDefault();
-        
+
         console.innerHTML = JSON.stringify(data);
     }, false);
 }
