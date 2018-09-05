@@ -1,4 +1,5 @@
 var numSocket = new Rete.Socket("Number");
+var stringSocket = new Rete.Socket("String");
 var floatSocket = new Rete.Socket("Float");
 
 class TextControl extends Rete.Control {
@@ -33,7 +34,7 @@ class TextControl extends Rete.Control {
     }
 
     mounted() {
-        this.scope.value = this.getData(this.key) || (this.type === 'number' ? 0 : '...');
+        this.scope.value = this.getData(this.key) || (this.type === 'number' ? 0 : 'Фраза');
         this.update();
     }
 
@@ -45,20 +46,15 @@ class TextControl extends Rete.Control {
 
 class AddComponent extends Rete.Component {
     constructor() {
-        super("Add");
+        super("Варианты");
     }
 
     builder(node) {
-        var inp1 = new Rete.Input('num1', "Number", numSocket);
-        var inp2 = new Rete.Input('num2', "Number", numSocket);
-        var out = new Rete.Output('num', "Number", numSocket);
-
-        inp1.addControl(new TextControl(this.editor, 'num1', false, 'number'));
-        inp2.addControl(new TextControl(this.editor, 'num2', false, 'number'));
+        var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket);
+        var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket);
 
         return node
                 .addInput(inp1)
-                .addInput(inp2)
                 .addControl(new TextControl(this.editor, 'preview', true))
                 .addOutput(out);
     }
@@ -88,12 +84,12 @@ class AddComponent extends Rete.Component {
 class OutputComponent extends Rete.Component {
 
     constructor() {
-        super("Output");
+        super("Конечная фраза");
     }
 
     builder(node) {
-        var inp = new Rete.Input('input', "Number", numSocket);
-        var ctrl = new TextControl(this.editor, 'name');
+        var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket);
+        var ctrl = new TextControl(this.editor, 'initphrase', false);
 
         return node.addControl(ctrl).addInput(inp);
     }
@@ -102,21 +98,39 @@ class OutputComponent extends Rete.Component {
 class NumComponent extends Rete.Component {
 
     constructor() {
-        super("Number");
+        super("Начальная реплика");
     }
 
     builder(node) {
-        var out1 = new Rete.Output('num', "Number", numSocket);
-        var ctrl = new TextControl(this.editor, 'num', false, 'number');
+        var out1 = new Rete.Output('initphrase', "Ожидаемые фразы", stringSocket);
+        var ctrl = new TextControl(this.editor, 'initphrase', false);
 
         return node.addControl(ctrl).addOutput(out1);
     }
 
     worker(node, inputs, outputs) {
-        outputs['num'] = node.data.num;
+        outputs['initphrase'] = node.data.initphrase;
     }
 }
 
+class ContinueComponent extends Rete.Component {
+
+    constructor() {
+        super("Ваш ответ");
+    }
+
+    builder(node) {
+        var inp = new Rete.Input('inputphrasephrase', "Входная фраза", stringSocket);
+        var out1 = new Rete.Output('continuephrase', "Ваш ответ", stringSocket);
+        var ctrl = new TextControl(this.editor, 'initphrase', false);
+
+        return node.addControl(ctrl).addOutput(out1).addInput(inp);
+    }
+
+    worker(node, inputs, outputs) {
+        outputs['initphrase'] = node.data.initphrase;
+    }
+}
 
 var container = document.querySelector('#rete');
 var editor = null;
@@ -128,7 +142,7 @@ editor.use(ContextMenuPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
-[new AddComponent, new OutputComponent, new NumComponent].map(c => {
+[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent ].map(c => {
     editor.register(c);
     engine.register(c);
 });
