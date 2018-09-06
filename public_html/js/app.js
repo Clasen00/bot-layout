@@ -27,14 +27,16 @@ class TextControl extends Rete.Control {
     }
 
     update() {
-        if (this.key)
-            this.putData(this.key, this.scope.value)
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
+
         this.emitter.trigger('process');
         this._alight.scan();
     }
 
     mounted() {
-        this.scope.value = this.getData(this.key) || (this.type === 'number' ? 0 : 'Фраза');
+        this.scope.value = this.getData(this.key);
         this.update();
     }
 
@@ -77,8 +79,10 @@ class RadioControl extends Rete.Control {
     }
 
     update() {
-        if (this.key)
-            this.putData(this.key, this.scope.value)
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
+
         this.emitter.trigger('process');
         this._alight.scan();
     }
@@ -88,7 +92,7 @@ class RadioControl extends Rete.Control {
 
     setValue(val) {
         this.scope.value = val;
-        this._alight.scan()
+        this._alight.scan();
     }
 }
 
@@ -100,24 +104,22 @@ class AddComponent extends Rete.Component {
     builder(node) {
         var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket);
         var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket);
+        let ctrl = new TextControl(this.editor, 'preview', false);
+        node.data.preview = "Вариант ответа";
 
         return node
                 .addInput(inp1)
-                .addControl(new TextControl(this.editor, 'preview', true))
+                .addControl(ctrl)
                 .addOutput(out);
     }
 
-    worker(node, inputs, outputs, {
-    silent
-    } = {}) {
-        var n1 = inputs['num1'].length ? inputs['num1'][0] : node.data.num1;
-        var n2 = inputs['num2'].length ? inputs['num2'][0] : node.data.num2;
-        var sum = n1 + n2;
-
-        if (!silent)
-            this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(sum);
-
-        outputs['num'] = sum;
+    worker(node, inputs, outputs) {
+        outputs['preview'] = node.data.preview;
+        //silent передается вот так: {    silent    } = {}
+        //пример получения данных с ноды
+//        if (!silent) {
+//            this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(sum);
+//        }
     }
 
     created(node) {
@@ -138,9 +140,18 @@ class OutputComponent extends Rete.Component {
 
     builder(node) {
         var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket);
-        var ctrl = new TextControl(this.editor, 'initphrase', false);
+        var ctrl = new TextControl(this.editor, 'outputphrase', false);
+        node.data.outputphrase = "Конечный ответ";
 
         return node.addControl(ctrl).addInput(inp);
+    }
+
+    worker(node, inputs, outputs) {
+        outputs['outputphrase'] = node.data.outputphrase;
+    }
+
+    destroyed(node) {
+        console.log('destroyed', node);
     }
 }
 
@@ -153,6 +164,7 @@ class NumComponent extends Rete.Component {
     builder(node) {
         var out1 = new Rete.Output('initphrase', "Ожидаемые фразы", stringSocket);
         var ctrl = new TextControl(this.editor, 'initphrase', false);
+        node.data.initphrase = "Ваша фраза";
 
         return node.addControl(ctrl).addOutput(out1);
     }
@@ -160,6 +172,11 @@ class NumComponent extends Rete.Component {
     worker(node, inputs, outputs) {
         outputs['initphrase'] = node.data.initphrase;
     }
+
+    destroyed(node) {
+        console.log('destroyed', node);
+    }
+
 }
 
 class ContinueComponent extends Rete.Component {
@@ -171,13 +188,14 @@ class ContinueComponent extends Rete.Component {
     builder(node) {
         var inp = new Rete.Input('inputphrasephrase', "Входная фраза", stringSocket);
         var out1 = new Rete.Output('continuephrase', "Ваш ответ", stringSocket);
-        var ctrl = new TextControl(this.editor, 'initphrase', false);
+        var ctrl = new TextControl(this.editor, 'continuephrase', false);
+        node.data.continuephrase = "Продолжение";
 
         return node.addControl(ctrl).addOutput(out1).addInput(inp);
     }
 
     worker(node, inputs, outputs) {
-        outputs['initphrase'] = node.data.initphrase;
+        outputs['continuephrase'] = node.data.continuephrase;
     }
 }
 
@@ -191,7 +209,7 @@ editor.use(ContextMenuPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
-[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent ].map(c => {
+[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent].map(c => {
     editor.register(c);
     engine.register(c);
 });
@@ -214,20 +232,30 @@ editor
 
                 await engine.abort();
                 await engine.process(editor.toJSON());
-                getConsoleData(editor.toJSON());
+                getConsoleData(editor, editor.toJSON());
             });
 
             editor.trigger("process");
             editor.view.resize();
         });
 
-function getConsoleData(data) {
+function getConsoleData(editor, data) {
     const target = document.getElementById('save');
-    const console = document.getElementById('console');
+    const htmlConsole = document.getElementById('console');
 
     target.addEventListener("click", e => {
         e.preventDefault();
 
-        console.innerHTML = JSON.stringify(data);
+        htmlConsole.innerHTML = (editor.nodes.length !== 0) ? JSON.stringify(data) : '';
     }, false);
 }
+
+var removeItem = function (object, key, value) {
+    if (value == undefined)
+        return;
+    for (var i in object) {
+        if (object[i][key] == value) {
+            object.splice(i, 1);
+        }
+    }
+};
