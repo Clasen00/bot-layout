@@ -96,16 +96,111 @@ class RadioControl extends Rete.Control {
     }
 }
 
+class ButtonControl extends Rete.Control {
+
+    constructor(emitter, key, text) {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.type = "Button";
+        this.template = '<input id="node_short_num" placeholder="Value" type="text" :value="value_num" @input="change_num($event)"/> <input id="node_short_txt" placeholder="Name" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+
+        this.scope = {
+            value_num: '',
+            value_text: '',
+            text: text,
+            change_num: this.change_num.bind(this),
+            change_txt: this.change_txt.bind(this),
+            change_btn: this.change_btn.bind(this)
+        };
+    }
+
+    change_btn(e) {
+        if (this.scope.value_num && this.scope.value_txt != '') {
+            this.getNode().addControl(new RadioControl(this.emitter, 'rad1', this.scope.value_num, "code", this.scope.value_txt))
+            this.scope.value_num = this.scope.value_txt = '';
+            this.emitter.trigger('process');
+            this.getNode()._alight.scan();
+        }
+    }
+
+    change_num(e) {
+        this.scope.value_num = e.target.value;
+//        this.scope.value = e.target.value;
+        this.update();
+    }
+
+    change_txt(e) {
+        this.scope.value_txt = e.target.value;
+        this.update();
+    }
+
+    update() {
+//        if(this.key)
+        //          this.putData(this.key, this.scope.value)
+        this.emitter.trigger('process');
+        this._alight.scan();
+    }
+
+    mounted() {
+    }
+
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan()
+    }
+}
+
+class RadioComponent extends Rete.Component {
+
+    constructor(){
+        super("Radio");
+	this.nd = {};
+    }
+
+    builder(node) {
+        var out1 = new Rete.Output("Number", numSocket);
+        var out2 = new Rete.Output("Text", stringSocket);
+        this.nd = node
+		.addControl(new ButtonControl(this.editor, 'btn', "+" ))
+		.addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
+		.addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
+		.addOutput(out1)
+		.addOutput(out2);
+	return this.nd;
+    }
+
+    worker(node, inputs, outputs, sourceCode) {
+    	sourceCode.append(`radio_${this.nd.id}_array = (\n`);
+	for (var i in this.nd.controls) {
+        	if (this.nd.controls[i].type == "Radio") {  
+		    	sourceCode.append(`"${this.nd.controls[i].scope.text}": ${this.nd.controls[i].scope.value},\n`);
+		}
+    	}
+    	sourceCode.append(`);\n`);
+
+	const key = 'radio_' + node.id + '_'  + Math.random().toString(36).substr(2, 6);
+	var value = 0;
+	if(node.data.rad1) 
+		value = node.data.rad1;
+    	sourceCode.append(`var ${key} = ${value};\n`);
+	outputs[0] = {
+	      key,
+	      value: value
+    	};
+    }
+}
+
 class AddComponent extends Rete.Component {
     constructor() {
-        super("Варианты");
+        super("Вариант ответа");
     }
 
     builder(node) {
         var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket);
         var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket);
         let ctrl = new TextControl(this.editor, 'preview', false);
-        node.data.preview = "Вариант ответа";
+        node.data.preview = "Ответ";
 
         return node
                 .addInput(inp1)
@@ -209,7 +304,7 @@ editor.use(ContextMenuPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
-[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent].map(c => {
+[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent, new RadioComponent].map(c => {
     editor.register(c);
     engine.register(c);
 });
