@@ -44,6 +44,54 @@ class TextControl extends Rete.Control {
     }
 }
 
+class RadioControl extends Rete.Control {
+
+    constructor(emitter, key, value, name, text) {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.keyz = Math.random().toString(36).substr(2, 9);
+        this.type = "Radio";
+        this.template = '<input id="node_radio" name={{name}} type="radio" :value="value" @click.noprevent.stop="change($event)" /><span style="display: inline-block; min-width: 160px;">{{text}}</span><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-';
+
+        this.scope = {
+            id: this.keyz,
+            value: value,
+            text: text,
+            name: name,
+            change: this.change.bind(this),
+            del_btn: this.del_btn.bind(this)
+        };
+    }
+    change(e) {
+        this.scope.value = +e.target.value;
+        this.update();
+    }
+
+    del_btn(e) {
+        var node = this.getNode();
+        var id = e.target.id;
+        removeItem(node.controls, "keyz", id);
+        this.emitter.trigger('process');
+        this.getNode()._alight.scan();
+    }
+
+    update() {
+        if (this.key)
+            this.putData(this.key, this.scope.value)
+        this.emitter.trigger('process');
+        this._alight.scan();
+    }
+
+    mounted() {
+    }
+
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan()
+    }
+}
+
 class AddComponent extends Rete.Component {
     constructor() {
         super("Варианты");
@@ -73,12 +121,13 @@ class AddComponent extends Rete.Component {
     }
 
     created(node) {
-        console.log('created', node)
+        console.log('created', node);
     }
 
     destroyed(node) {
-        console.log('destroyed', node)
+        console.log('destroyed', node);
     }
+
 }
 
 class OutputComponent extends Rete.Component {
