@@ -164,8 +164,8 @@ class RadioComponent extends Rete.Component {
 
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
-                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
-                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
+                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Вариант 1"))
+                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Вариант 2"))
                 .addInput(inp1)
                 .addOutput(out2);
         return this.nd;
