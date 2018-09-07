@@ -153,41 +153,43 @@ class ButtonControl extends Rete.Control {
 
 class RadioComponent extends Rete.Component {
 
-    constructor(){
-        super("Radio");
-	this.nd = {};
+    constructor() {
+        super("Динамичный ответ");
+        this.nd = {};
     }
 
     builder(node) {
-        var out1 = new Rete.Output("Number", numSocket);
-        var out2 = new Rete.Output("Text", stringSocket);
+        var out2 = new Rete.Output('addinput', "Вариант ответа", stringSocket);
+        var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
+
         this.nd = node
-		.addControl(new ButtonControl(this.editor, 'btn', "+" ))
-		.addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
-		.addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
-		.addOutput(out1)
-		.addOutput(out2);
-	return this.nd;
+                .addControl(new ButtonControl(this.editor, 'btn', "+"))
+                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
+                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
+                .addInput(inp1)
+                .addOutput(out2);
+        return this.nd;
     }
 
     worker(node, inputs, outputs, sourceCode) {
-    	sourceCode.append(`radio_${this.nd.id}_array = (\n`);
-	for (var i in this.nd.controls) {
-        	if (this.nd.controls[i].type == "Radio") {  
-		    	sourceCode.append(`"${this.nd.controls[i].scope.text}": ${this.nd.controls[i].scope.value},\n`);
-		}
-    	}
-    	sourceCode.append(`);\n`);
+        console.log(sourceCode);
+        sourceCode.append(`radio_${this.nd.id}_array = (\n`);
+        for (var i in this.nd.controls) {
+            if (this.nd.controls[i].type == "Radio") {
+                sourceCode.append(`"${this.nd.controls[i].scope.text}": ${this.nd.controls[i].scope.value},\n`);
+            }
+        }
+        sourceCode.append(`);\n`);
 
-	const key = 'radio_' + node.id + '_'  + Math.random().toString(36).substr(2, 6);
-	var value = 0;
-	if(node.data.rad1) 
-		value = node.data.rad1;
-    	sourceCode.append(`var ${key} = ${value};\n`);
-	outputs[0] = {
-	      key,
-	      value: value
-    	};
+        const key = 'radio_' + node.id + '_' + Math.random().toString(36).substr(2, 6);
+        var value = 0;
+        if (node.data.rad1)
+            value = node.data.rad1;
+        sourceCode.append(`var ${key} = ${value};\n`);
+        outputs[0] = {
+            key,
+            value: value
+        };
     }
 }
 
@@ -197,9 +199,9 @@ class AddComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket);
-        var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket);
-        let ctrl = new TextControl(this.editor, 'preview', false);
+        var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket, true);
+        var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket, true);
+        let ctrl = new TextControl(this.editor, 'preview');
         node.data.preview = "Ответ";
 
         return node
@@ -234,7 +236,7 @@ class OutputComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket);
+        var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket, true);
         var ctrl = new TextControl(this.editor, 'outputphrase', false);
         node.data.outputphrase = "Конечный ответ";
 
