@@ -46,6 +46,50 @@ class TextControl extends Rete.Control {
     }
 }
 
+class TextAreaControl extends Rete.Control {
+
+    constructor(emitter, key, readonly, type = 'text') {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.type = type;
+        this.template = `<textarea :readonly="readonly" :value="value" @input="change($event)"> </textarea>`;
+
+        this.scope = {
+            value: null,
+            readonly,
+            change: this.change.bind(this)
+        };
+    }
+
+    onChange() {}
+
+    change(e) {
+        this.scope.value = this.type === 'number' ? +e.target.value : e.target.value;
+        this.update();
+        this.onChange();
+    }
+
+    update() {
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
+
+        this.emitter.trigger('process');
+        this._alight.scan();
+    }
+
+    mounted() {
+        this.scope.value = this.getData(this.key);
+        this.update();
+    }
+
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan()
+    }
+}
+
 class RadioControl extends Rete.Control {
 
     constructor(emitter, key, value, name, text) {
@@ -116,7 +160,7 @@ class ButtonControl extends Rete.Control {
     }
 
     change_btn(e) {
-        if (this.scope.value_num && this.scope.value_txt != '') {
+        if (this.scope.value_num && this.scope.value_txt !== '') {
             this.getNode().addControl(new RadioControl(this.emitter, 'rad1', this.scope.value_num, "code", this.scope.value_txt))
             this.scope.value_num = this.scope.value_txt = '';
             this.emitter.trigger('process');
@@ -159,20 +203,18 @@ class RadioComponent extends Rete.Component {
     }
 
     builder(node) {
-        var out2 = new Rete.Output('addinput', "Вариант ответа", stringSocket);
+        var out1 = new Rete.Output('addinput', "Вариант ответа", stringSocket);
         var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
 
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
-                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Вариант 1"))
-                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Вариант 2"))
-                .addInput(inp1)
-                .addOutput(out2);
+                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
+                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
+                .addOutput(out1);
         return this.nd;
     }
 
     worker(node, inputs, outputs, sourceCode) {
-        console.log(sourceCode);
         sourceCode.append(`radio_${this.nd.id}_array = (\n`);
         for (var i in this.nd.controls) {
             if (this.nd.controls[i].type == "Radio") {
@@ -183,8 +225,11 @@ class RadioComponent extends Rete.Component {
 
         const key = 'radio_' + node.id + '_' + Math.random().toString(36).substr(2, 6);
         var value = 0;
-        if (node.data.rad1)
+
+        if (node.data.rad1) {
             value = node.data.rad1;
+        }
+
         sourceCode.append(`var ${key} = ${value};\n`);
         outputs[0] = {
             key,
@@ -238,6 +283,7 @@ class OutputComponent extends Rete.Component {
     builder(node) {
         var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket, true);
         var ctrl = new TextControl(this.editor, 'outputphrase', false);
+        var ctrl2 = new TextAreaControl(this.editor, 'outputphrase', false);
         node.data.outputphrase = "Конечный ответ";
 
         return node.addControl(ctrl).addInput(inp);
@@ -326,15 +372,22 @@ editor
                 if (engine.silent) {
                     return;
                 }
-
+                let sourceCode = {
+                    _s: '',
+                    append(s) {
+                        this._s += s;
+                    }
+                };
                 await engine.abort();
-                await engine.process(editor.toJSON());
+                await engine.process(editor.toJSON(), null, sourceCode);
                 getConsoleData(editor, editor.toJSON());
             });
 
             editor.trigger("process");
             editor.view.resize();
         });
+
+
 
 function getConsoleData(editor, data) {
     const target = document.getElementById('save');
