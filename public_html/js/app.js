@@ -1,6 +1,5 @@
 var numSocket = new Rete.Socket("Number");
 var stringSocket = new Rete.Socket("String");
-var floatSocket = new Rete.Socket("Float");
 
 class TextControl extends Rete.Control {
 
