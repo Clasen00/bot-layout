@@ -146,10 +146,9 @@ class ButtonControl extends Rete.Control {
         this.emitter = emitter;
         this.key = key;
         this.type = "Button";
-        this.template = '<input id="node_short_num" placeholder="Value" type="text" :value="value_num" @input="change_num($event)"/> <input id="node_short_txt" placeholder="Name" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+        this.template = '<input id="node_short_txt" placeholder="Name" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
         this.scope = {
-            value_num: '',
             value_text: '',
             text: text,
             change_num: this.change_num.bind(this),
@@ -159,16 +158,22 @@ class ButtonControl extends Rete.Control {
     }
 
     change_btn(e) {
-        if (this.scope.value_num && this.scope.value_txt !== '') {
-            this.getNode().addControl(new RadioControl(this.emitter, 'rad1', this.scope.value_num, "code", this.scope.value_txt))
-            this.scope.value_num = this.scope.value_txt = '';
+        if (this.scope.value_txt !== '') {
+            
+            //todo 
+            this.getNode().addControl(new TextControl(this.emitter, 'preview'));
+            //разобраться с появлением строки
+            console.log(this.getNode());
+            this.getNode().putData('preview', this.scope.value_txt)
+            this.getNode().addOutput(new Rete.Output('addinput', "Вариант ответа", stringSocket));
+            this.scope.value_txt = '';
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
         }
     }
 
     change_num(e) {
-        this.scope.value_num = e.target.value;
+//        this.scope.value_num = e.target.value;
 //        this.scope.value = e.target.value;
         this.update();
     }
@@ -209,6 +214,7 @@ class RadioComponent extends Rete.Component {
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
                 .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
                 .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
+                .addInput(inp1)
                 .addOutput(out1);
         return this.nd;
     }
