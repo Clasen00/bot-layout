@@ -97,7 +97,7 @@ class RadioControl extends Rete.Control {
         this.key = key;
         this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = "Radio";
-        this.template = '<input id="node_radio" name={{name}} type="radio" :value="value" @click.noprevent.stop="change($event)" /><span style="display: inline-block; min-width: 160px;">{{text}}</span><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-';
+        this.template = '<span style="display: inline-block; min-width: 160px;">{{text}}</span><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-';
 
         this.scope = {
             id: this.keyz,
@@ -159,13 +159,9 @@ class ButtonControl extends Rete.Control {
 
     change_btn(e) {
         if (this.scope.value_txt !== '') {
-            
-            //todo 
-            this.getNode().addControl(new TextControl(this.emitter, 'preview'));
-            //разобраться с появлением строки
-            console.log(this.getNode());
-            this.getNode().putData('preview', this.scope.value_txt)
-            this.getNode().addOutput(new Rete.Output('addinput', "Вариант ответа", stringSocket));
+            this.getNode().addControl(new TextControl(this.emitter, this.scope.value_txt));
+            this.putData(this.scope.value_txt, this.scope.value_txt);
+            this.getNode().addControl(new RadioControl(this.emitter, 'rad1', this.scope.value_num, "code", this.scope.value_txt));
             this.scope.value_txt = '';
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
@@ -212,8 +208,6 @@ class RadioComponent extends Rete.Component {
 
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
-                .addControl(new RadioControl(this.editor, 'rad1', 33, "code", "Steel"))
-                .addControl(new RadioControl(this.editor, 'rad1', 44, "code", "Water"))
                 .addInput(inp1)
                 .addOutput(out1);
         return this.nd;
@@ -231,9 +225,13 @@ class RadioComponent extends Rete.Component {
         const key = 'radio_' + node.id + '_' + Math.random().toString(36).substr(2, 6);
         var value = 0;
 
-        if (node.data.rad1) {
-            value = node.data.rad1;
+        for (var i in node.data) {
+            if (node.data.i) {
+                value = node.data[i];
+            }
         }
+
+//        this.getNode.addOutput(new Rete.Output('addinput', this.scope.value_txt, stringSocket));
 
         sourceCode.append(`var ${key} = ${value};\n`);
         outputs[0] = {
