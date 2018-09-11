@@ -199,7 +199,7 @@ class ButtonControl extends Rete.Control {
         this.emitter = emitter;
         this.key = key;
         this.type = "Button";
-        this.template = '<input id="node_short_txt" placeholder="Name" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+        this.template = '<input id="node_short_txt" placeholder="Ответ" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
         this.scope = {
             value_text: '',
