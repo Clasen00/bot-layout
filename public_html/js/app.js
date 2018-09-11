@@ -41,7 +41,60 @@ class TextControl extends Rete.Control {
 
     setValue(val) {
         this.scope.value = val;
-        this._alight.scan()
+        this._alight.scan();
+    }
+}
+
+class MultiplicityControl extends Rete.Control {
+
+    constructor(emitter, key, readonly, type = 'text') {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.type = type;
+        this.template = `<input type="${type}" :readonly="readonly" :value="value" @input="change($event)"/><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-`;
+
+        this.scope = {
+            value: null,
+            readonly,
+            change: this.change.bind(this),
+            del_btn: this.del_btn.bind(this)
+        };
+    }
+
+    onChange() {}
+
+    del_btn(e) {
+        var node = this.getNode();
+        var id = e.target.id;
+        removeItem(node.controls, "keyz", id);
+        this.emitter.trigger('process');
+        this.getNode()._alight.scan();
+    }
+
+    change(e) {
+        this.scope.value = this.type === 'number' ? +e.target.value : e.target.value;
+        this.update();
+        this.onChange();
+    }
+
+    update() {
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
+
+        this.emitter.trigger('process');
+        this._alight.scan();
+    }
+
+    mounted() {
+        this.scope.value = this.getData(this.key);
+        this.update();
+    }
+
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan();
     }
 }
 
@@ -85,7 +138,7 @@ class TextAreaControl extends Rete.Control {
 
     setValue(val) {
         this.scope.value = val;
-        this._alight.scan()
+        this._alight.scan();
     }
 }
 
@@ -159,9 +212,8 @@ class ButtonControl extends Rete.Control {
 
     change_btn(e) {
         if (this.scope.value_txt !== '') {
-            this.getNode().addControl(new TextControl(this.emitter, this.scope.value_txt));
             this.putData(this.scope.value_txt, this.scope.value_txt);
-            this.getNode().addControl(new RadioControl(this.emitter, 'rad1', this.scope.value_num, "code", this.scope.value_txt));
+            this.getNode().addControl(new MultiplicityControl(this.emitter, this.scope.value_txt));
             this.scope.value_txt = '';
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
@@ -180,8 +232,9 @@ class ButtonControl extends Rete.Control {
     }
 
     update() {
-//        if(this.key)
-        //          this.putData(this.key, this.scope.value)
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
         this.emitter.trigger('process');
         this._alight.scan();
     }
@@ -191,7 +244,7 @@ class ButtonControl extends Rete.Control {
 
     setValue(val) {
         this.scope.value = val;
-        this._alight.scan()
+        this._alight.scan();
     }
 }
 
