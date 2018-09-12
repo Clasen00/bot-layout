@@ -51,11 +51,13 @@ class MultiplicityControl extends Rete.Control {
         super();
         this.emitter = emitter;
         this.key = key;
+        this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = type;
         this.template = `<input type="${type}" :readonly="readonly" :value="value" @input="change($event)"/><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-`;
 
         this.scope = {
             value: null,
+            id: this.keyz,
             readonly,
             change: this.change.bind(this),
             del_btn: this.del_btn.bind(this)
@@ -66,8 +68,7 @@ class MultiplicityControl extends Rete.Control {
 
     del_btn(e) {
         var node = this.getNode();
-        var id = e.target.id;
-        removeItem(node.controls, "keyz", id);
+        node.controls.delete(this.scope.value);
         this.emitter.trigger('process');
         this.getNode()._alight.scan();
     }
@@ -96,6 +97,7 @@ class MultiplicityControl extends Rete.Control {
         this.scope.value = val;
         this._alight.scan();
     }
+
 }
 
 class TextAreaControl extends Rete.Control {
@@ -142,56 +144,6 @@ class TextAreaControl extends Rete.Control {
     }
 }
 
-class RadioControl extends Rete.Control {
-
-    constructor(emitter, key, value, name, text) {
-        super();
-        this.emitter = emitter;
-        this.key = key;
-        this.keyz = Math.random().toString(36).substr(2, 9);
-        this.type = "Radio";
-        this.template = '<span style="display: inline-block; min-width: 160px;">{{text}}</span><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-';
-
-        this.scope = {
-            id: this.keyz,
-            value: value,
-            text: text,
-            name: name,
-            change: this.change.bind(this),
-            del_btn: this.del_btn.bind(this)
-        };
-    }
-    change(e) {
-        this.scope.value = +e.target.value;
-        this.update();
-    }
-
-    del_btn(e) {
-        var node = this.getNode();
-        var id = e.target.id;
-        removeItem(node.controls, "keyz", id);
-        this.emitter.trigger('process');
-        this.getNode()._alight.scan();
-    }
-
-    update() {
-        if (this.key) {
-            this.putData(this.key, this.scope.value);
-        }
-
-        this.emitter.trigger('process');
-        this._alight.scan();
-    }
-
-    mounted() {
-    }
-
-    setValue(val) {
-        this.scope.value = val;
-        this._alight.scan();
-    }
-}
-
 class ButtonControl extends Rete.Control {
 
     constructor(emitter, key, text) {
@@ -204,7 +156,6 @@ class ButtonControl extends Rete.Control {
         this.scope = {
             value_text: '',
             text: text,
-            change_num: this.change_num.bind(this),
             change_txt: this.change_txt.bind(this),
             change_btn: this.change_btn.bind(this)
         };
@@ -218,12 +169,6 @@ class ButtonControl extends Rete.Control {
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
         }
-    }
-
-    change_num(e) {
-//        this.scope.value_num = e.target.value;
-//        this.scope.value = e.target.value;
-        this.update();
     }
 
     change_txt(e) {
@@ -256,7 +201,7 @@ class RadioComponent extends Rete.Component {
     }
 
     builder(node) {
-        var out1 = new Rete.Output('addinput', "Вариант ответа", stringSocket);
+        var out1 = new Rete.Output('radiooutput', "Вариант ответа", stringSocket);
         var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
 
         this.nd = node
@@ -339,7 +284,6 @@ class OutputComponent extends Rete.Component {
     builder(node) {
         var inp = new Rete.Input('endphrase', "Конечная фраза", stringSocket, true);
         var ctrl = new TextControl(this.editor, 'outputphrase', false);
-        var ctrl2 = new TextAreaControl(this.editor, 'outputphrase', false);
         node.data.outputphrase = "Конечный ответ";
 
         return node.addControl(ctrl).addInput(inp);
@@ -455,13 +399,3 @@ function getConsoleData(editor, data) {
         htmlConsole.innerHTML = (editor.nodes.length !== 0) ? JSON.stringify(data) : '';
     }, false);
 }
-
-var removeItem = function (object, key, value) {
-    if (value == undefined)
-        return;
-    for (var i in object) {
-        if (object[i][key] == value) {
-            object.splice(i, 1);
-        }
-    }
-};
