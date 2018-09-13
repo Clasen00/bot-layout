@@ -106,20 +106,28 @@ header-h1 {
 }
 
 
-#save {
+.save, .add-init  {
     padding: 1em;
-    color: white;
     background-color: #41c14f;
     border-radius: 10px;
 }
 
-#save:hover {
+.add-init {
+    background-color: #4167c1;
+}
+
+.save:hover {
     text-decoration: none;
 }
 
 .toolsection-list__item {
     float: left;
     padding-top: 1em;
+    margin-right: 10px;
+}
+
+.toolsection-list__item a {
+    color: white;
 }
 
 .socket{

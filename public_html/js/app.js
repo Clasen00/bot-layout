@@ -352,7 +352,13 @@ editor.use(ContextMenuPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
-[new NumComponent, new AddComponent, new ContinueComponent, new OutputComponent, new RadioComponent].map(c => {
+const NumClientClientComponent = new NumComponent();
+const AddClientComponent = new AddComponent();
+const RadioClientComponent = new RadioComponent();
+const ContinueClientComponent = new ContinueComponent();
+const OutputClientComponent = new OutputComponent();
+
+[NumClientClientComponent, AddClientComponent, ContinueClientComponent, OutputClientComponent, RadioClientComponent].map(c => {
     editor.register(c);
     engine.register(c);
 });
