@@ -123,6 +123,9 @@ header-h1 {
 .toolsection-list__item {
     float: left;
     padding-top: 1em;
+}
+
+.toolsection-list__item:not(:last-child) {
     margin-right: 10px;
 }
 

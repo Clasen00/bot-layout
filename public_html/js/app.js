@@ -201,24 +201,17 @@ class RadioComponent extends Rete.Component {
     }
 
     builder(node) {
-        var out1 = new Rete.Output('radiooutput', "Вариант ответа", stringSocket);
+//        var out1 = new Rete.Output('radiooutput', "Вариант ответа", stringSocket);
         var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
 
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
-                .addInput(inp1)
-                .addOutput(out1);
+                .addInput(inp1);
+//                .addOutput(out1);
         return this.nd;
     }
 
     worker(node, inputs, outputs, sourceCode) {
-        sourceCode.append(`radio_${this.nd.id}_array = (\n`);
-        for (var i in this.nd.controls) {
-            if (this.nd.controls[i].type == "Radio") {
-                sourceCode.append(`"${this.nd.controls[i].scope.text}": ${this.nd.controls[i].scope.value},\n`);
-            }
-        }
-        sourceCode.append(`);\n`);
 
         const key = 'radio_' + node.id + '_' + Math.random().toString(36).substr(2, 6);
         var value = 0;
@@ -229,9 +222,6 @@ class RadioComponent extends Rete.Component {
             }
         }
 
-//        this.getNode.addOutput(new Rete.Output('addinput', this.scope.value_txt, stringSocket));
-
-        sourceCode.append(`var ${key} = ${value};\n`);
         outputs[0] = {
             key,
             value: value
@@ -358,6 +348,9 @@ const RadioClientComponent = new RadioComponent();
 const ContinueClientComponent = new ContinueComponent();
 const OutputClientComponent = new OutputComponent();
 
+const addVariableNodeButton = document.querySelector('#addVariableNode');
+const addEndNodeButton = document.querySelector('#addEndNode');
+
 [NumClientClientComponent, AddClientComponent, ContinueClientComponent, OutputClientComponent, RadioClientComponent].map(c => {
     editor.register(c);
     engine.register(c);
@@ -386,14 +379,32 @@ editor
                 };
                 await engine.abort();
                 await engine.process(editor.toJSON(), null, sourceCode);
+
                 getConsoleData(editor, editor.toJSON());
+                await initClickNode();
             });
 
             editor.trigger("process");
             editor.view.resize();
         });
 
+async function initClickNode() {
 
+    const addInitNodeButton = document.querySelector('#addInitNode');
+
+    addInitNodeButton.addEventListener("click", await function (e) {
+        const node = NumClientClientComponent.createNode();
+
+        node.position[0] = '100px';
+        node.position[1] = '100px';
+
+        this.editor.addNode(node);
+
+        e.preventDefault();
+        console.log(e);
+    }, false);
+
+}
 
 function getConsoleData(editor, data) {
     const target = document.getElementById('save');
