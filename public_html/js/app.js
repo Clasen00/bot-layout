@@ -160,11 +160,13 @@ class ButtonControl extends Rete.Control {
             change_btn: this.change_btn.bind(this)
         };
     }
-
+//TODO обернуть <li> в <a>
     change_btn(e) {
         if (this.scope.value_txt !== '') {
             this.putData(this.scope.value_txt, this.scope.value_txt);
             this.getNode().addControl(new MultiplicityControl(this.emitter, this.scope.value_txt));
+            this.getNode().addOutput(new Rete.Output('addoutput', this.scope.value_txt, stringSocket, true));
+            console.log(this.getNode());
             this.scope.value_txt = '';
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
