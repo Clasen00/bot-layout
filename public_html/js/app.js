@@ -161,13 +161,13 @@ class ButtonControl extends Rete.Control {
             change_btn: this.change_btn.bind(this)
         };
     }
-//TODO обернуть <li> в <a>
+
     change_btn(e) {
-        
+
         let controls = this.getNode().controls;
         let outputs = this.getNode().outputs;
-        let input  = this.getNode().input;
-        
+        let input = this.getNode().input;
+
         if (this.scope.value_txt !== '') {
             this.putData(this.scope.value_txt, this.scope.value_txt);
             this.getNode().addControl(new MultiplicityControl(this.emitter, this.scope.value_txt));
