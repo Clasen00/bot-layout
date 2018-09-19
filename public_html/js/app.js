@@ -150,6 +150,7 @@ class ButtonControl extends Rete.Control {
         super();
         this.emitter = emitter;
         this.key = key;
+        this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = "Button";
         this.template = '<input id="node_short_txt" placeholder="Ответ" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
@@ -162,11 +163,16 @@ class ButtonControl extends Rete.Control {
     }
 //TODO обернуть <li> в <a>
     change_btn(e) {
+        
+        let controls = this.getNode().controls;
+        let outputs = this.getNode().outputs;
+        let input  = this.getNode().input;
+        
         if (this.scope.value_txt !== '') {
             this.putData(this.scope.value_txt, this.scope.value_txt);
             this.getNode().addControl(new MultiplicityControl(this.emitter, this.scope.value_txt));
-            this.getNode().addOutput(new Rete.Output('addoutput', this.scope.value_txt, stringSocket, true));
-            console.log(this.getNode());
+            outputs.set(this.scope.value_txt, new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true));
+            console.log(outputs);
             this.scope.value_txt = '';
             this.emitter.trigger('process');
             this.getNode()._alight.scan();
@@ -209,7 +215,6 @@ class RadioComponent extends Rete.Component {
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
                 .addInput(inp1);
-//                .addOutput(out1);
         return this.nd;
     }
 
