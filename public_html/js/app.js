@@ -1,5 +1,6 @@
 var numSocket = new Rete.Socket("Number");
 var stringSocket = new Rete.Socket("String");
+var actSocket = new Rete.Socket("Action");
 
 class TextControl extends Rete.Control {
 
@@ -42,6 +43,32 @@ class TextControl extends Rete.Control {
     setValue(val) {
         this.scope.value = val;
         this._alight.scan();
+    }
+}
+
+class InputControl extends Rete.Control {
+
+    constructor(key) {
+        super();
+        this.render = 'js';
+        this.key = key;
+    }
+
+    handler(el, editor) {
+        var input = document.createElement('input');
+        var label = document.createElement('label');
+        el.appendChild(input);
+        el.appendChild(label);
+
+        var text = this.getData(this.key) || "^\d{10}$";
+        var labelText = "Регулярное выражение для телефона";
+
+        input.value = text;
+        labelText.value = labelText;
+        this.putData(this.key, text);
+        input.addEventListener("change", () => {
+            this.putData(this.key, input.value);
+        });
     }
 }
 
@@ -155,7 +182,7 @@ class ButtonControl extends Rete.Control {
         this.template = '<input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
         this.scope = {
-            value_text: '',
+            value_text: "",
             text: text,
             change_txt: this.change_txt.bind(this),
             change_btn: this.change_btn.bind(this)
@@ -167,7 +194,7 @@ class ButtonControl extends Rete.Control {
         let outputs = this.getNode().outputs;
         let input = this.getNode().input;
 
-        if (this.scope.value_txt !== "") {
+        if (this.scope.value_txt !== undefined && this.scope.value_txt !== "") {
             this.putData(this.scope.value_txt, this.scope.value_txt);
             this.getNode().addControl(
                     new MultiplicityControl(this.emitter, this.scope.value_txt)
@@ -217,16 +244,14 @@ class MessageMatchComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp1 = new Rete.Input("Action", actSocket);
-        var inp2 = new Rete.Input("Text", strSocket);
-        var out1 = new Rete.Output("True", actSocket);
-        var out2 = new Rete.Output("False", actSocket);
+        var inp1 = new Rete.Input('messageMatchText', "Текст", stringSocket);
+        var out1 = new Rete.Output('messageMatchTrue', "Да", stringSocket, true);
+        var out2 = new Rete.Output('messageMatchFalse', "Нет", stringSocket, true);
         var ctrl = new InputControl('regexp');
 
         return node
                 .addControl(ctrl)
                 .addInput(inp1)
-                .addInput(inp2)
                 .addOutput(out1)
                 .addOutput(out2);
     }
@@ -290,7 +315,7 @@ class OutputComponent extends Rete.Component {
     }
 
     worker(node, inputs, outputs) {
-        outputs['outputphrase'] = node.data.outputphrase;
+        return outputs['outputphrase'] = node.data.outputphrase;
     }
 
     destroyed(node) {
@@ -313,7 +338,7 @@ class InitialComponent extends Rete.Component {
     }
 
     worker(node, inputs, outputs) {
-        outputs['initphrase'] = node.data.initphrase;
+        return outputs['initphrase'] = node.data.initphrase;
     }
 
     destroyed(node) {
@@ -338,8 +363,18 @@ class ContinueComponent extends Rete.Component {
     }
 
     worker(node, inputs, outputs) {
-        outputs['continuephrase'] = node.data.continuephrase;
+        return outputs['continuephrase'] = node.data.continuephrase;
     }
+}
+
+const JsRenderPlugin = {
+  install(editor, params = {}){
+    editor.on('rendercontrol', ({el, control}) => {
+      if(control.render && control.render !== 'js') return;
+      
+      control.handler(el, editor);
+    });
+  }
 }
 
 var container = document.querySelector('#rete');
@@ -349,11 +384,12 @@ var editor = new Rete.NodeEditor("demo@0.1.0", container);
 editor.use(ConnectionPlugin, {curvature: 0.4});
 editor.use(AlightRenderPlugin);
 editor.use(ContextMenuPlugin);
+editor.use(JsRenderPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
 const InitialClientClientComponent = new InitialComponent();
-const MessageMatchComponent = new MessageMatchComponent();
+const MessageMatchClientComponent = new MessageMatchComponent();
 const RadioClientComponent = new RadioComponent();
 const ContinueClientComponent = new ContinueComponent();
 const OutputClientComponent = new OutputComponent();
@@ -361,7 +397,7 @@ const OutputClientComponent = new OutputComponent();
 const addVariableNodeButton = document.querySelector('#addVariableNode');
 const addEndNodeButton = document.querySelector('#addEndNode');
 
-[InitialClientClientComponent, ContinueClientComponent, RadioClientComponent, MessageMatchComponent, OutputClientComponent].map(c => {
+[InitialClientClientComponent, ContinueClientComponent, RadioClientComponent, MessageMatchClientComponent, OutputClientComponent].map(c => {
     editor.register(c);
     engine.register(c);
 });
