@@ -152,7 +152,7 @@ class ButtonControl extends Rete.Control {
         this.key = key;
         this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = "Button";
-        this.template = '<input id="node_short_txt" placeholder="Ответ" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+        this.template = '<input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
         this.scope = {
             value_text: '',
@@ -205,10 +205,45 @@ class ButtonControl extends Rete.Control {
     }
 }
 
+
+//доделать в соответсвии с тз
+class MessageMatchComponent extends Rete.Component {
+
+    constructor() {
+        super("Ожидаемое сообщение");
+        this.task = {
+            outputs: ['option', 'option']
+        }
+    }
+
+    builder(node) {
+        var inp1 = new Rete.Input("Action", actSocket);
+        var inp2 = new Rete.Input("Text", strSocket);
+        var out1 = new Rete.Output("True", actSocket);
+        var out2 = new Rete.Output("False", actSocket);
+        var ctrl = new InputControl('regexp');
+
+        return node
+                .addControl(ctrl)
+                .addInput(inp1)
+                .addInput(inp2)
+                .addOutput(out1)
+                .addOutput(out2);
+    }
+    worker(node, inputs) {
+        var text = inputs[0] ? inputs[0][0] : "";
+
+        if (!text.match(new RegExp(node.data.regexp, "gi")))
+            this.closed = [0];
+        else
+            this.closed = [1];
+    }
+}
+
 class RadioComponent extends Rete.Component {
 
     constructor() {
-        super("Динамичный ответ");
+        super("Ожидаемая реплика");
         this.nd = {};
     }
 
@@ -240,42 +275,6 @@ class RadioComponent extends Rete.Component {
     }
 }
 
-class AddComponent extends Rete.Component {
-    constructor() {
-        super("Вариант ответа");
-    }
-
-    builder(node) {
-        var inp1 = new Rete.Input('addinput', "Вариант ответа", stringSocket, true);
-        var out = new Rete.Output('addoutput', "Ваш ответ", stringSocket, true);
-        let ctrl = new TextControl(this.editor, 'preview');
-        node.data.preview = "Ответ";
-
-        return node
-                .addInput(inp1)
-                .addControl(ctrl)
-                .addOutput(out);
-    }
-
-    worker(node, inputs, outputs) {
-        outputs['preview'] = node.data.preview;
-        //silent передается вот так: {    silent    } = {}
-        //пример получения данных с ноды
-//        if (!silent) {
-//            this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(sum);
-//        }
-    }
-
-    created(node) {
-        console.log('created', node);
-    }
-
-    destroyed(node) {
-        console.log('destroyed', node);
-    }
-
-}
-
 class OutputComponent extends Rete.Component {
 
     constructor() {
@@ -299,7 +298,7 @@ class OutputComponent extends Rete.Component {
     }
 }
 
-class NumComponent extends Rete.Component {
+class InitialComponent extends Rete.Component {
 
     constructor() {
         super("Начальная реплика");
@@ -353,8 +352,8 @@ editor.use(ContextMenuPlugin);
 
 var engine = new Rete.Engine("demo@0.1.0");
 
-const NumClientClientComponent = new NumComponent();
-const AddClientComponent = new AddComponent();
+const InitialClientClientComponent = new InitialComponent();
+const MessageMatchComponent = new MessageMatchComponent();
 const RadioClientComponent = new RadioComponent();
 const ContinueClientComponent = new ContinueComponent();
 const OutputClientComponent = new OutputComponent();
@@ -362,7 +361,7 @@ const OutputClientComponent = new OutputComponent();
 const addVariableNodeButton = document.querySelector('#addVariableNode');
 const addEndNodeButton = document.querySelector('#addEndNode');
 
-[NumClientClientComponent, AddClientComponent, ContinueClientComponent, OutputClientComponent, RadioClientComponent].map(c => {
+[InitialClientClientComponent, ContinueClientComponent, RadioClientComponent, MessageMatchComponent, OutputClientComponent].map(c => {
     editor.register(c);
     engine.register(c);
 });
@@ -404,7 +403,7 @@ async function initClickNode() {
     const addInitNodeButton = document.querySelector('#addInitNode');
 
     addInitNodeButton.addEventListener("click", await function (e) {
-        const node = NumClientClientComponent.createNode();
+        const node = InitialClientClientComponent.createNode();
 
         node.position[0] = '100px';
         node.position[1] = '100px';
