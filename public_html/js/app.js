@@ -163,18 +163,22 @@ class ButtonControl extends Rete.Control {
     }
 
     change_btn(e) {
-
         let controls = this.getNode().controls;
         let outputs = this.getNode().outputs;
         let input = this.getNode().input;
 
-        if (this.scope.value_txt !== '') {
+        if (this.scope.value_txt !== "") {
             this.putData(this.scope.value_txt, this.scope.value_txt);
-            this.getNode().addControl(new MultiplicityControl(this.emitter, this.scope.value_txt));
-            outputs.set(this.scope.value_txt, new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true));
+            this.getNode().addControl(
+                    new MultiplicityControl(this.emitter, this.scope.value_txt)
+                    );
+            /// using addOutput instead of outputs.set(key, new Output(...))
+            this.getNode().addOutput(
+                    new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true)
+                    );
             console.log(outputs);
-            this.scope.value_txt = '';
-            this.emitter.trigger('process');
+            this.scope.value_txt = "";
+            this.emitter.trigger("process");
             this.getNode()._alight.scan();
         }
     }
