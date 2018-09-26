@@ -57,14 +57,17 @@ class InputControl extends Rete.Control {
     handler(el, editor) {
         var input = document.createElement('input');
         var label = document.createElement('label');
+        var br = document.createElement('br');
         el.appendChild(input);
+        el.appendChild(br);
         el.appendChild(label);
 
         var text = this.getData(this.key) || "^\d{10}$";
         var labelText = "Регулярное выражение для телефона";
+        label.style.color = 'white';
 
         input.value = text;
-        labelText.value = labelText;
+        label.innerHTML = labelText;
         this.putData(this.key, text);
         input.addEventListener("change", () => {
             this.putData(this.key, input.value);
@@ -232,8 +235,68 @@ class ButtonControl extends Rete.Control {
     }
 }
 
+class MatchSelectControl extends Rete.Control {
 
-//доделать в соответсвии с тз
+    constructor(emitter, key, text) {
+        super();
+        this.emitter = emitter;
+        this.key = key;
+        this.keyz = Math.random().toString(36).substr(2, 9);
+        this.type = "Button";
+        //создать темплейт для селекта
+        this.template = '<select><option> Пункт 1 </option></select><input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+
+        this.scope = {
+            value_text: "",
+            text: text,
+            change_txt: this.change_txt.bind(this),
+            change_btn: this.change_btn.bind(this)
+        };
+    }
+
+    change_btn(e) {
+        let controls = this.getNode().controls;
+        let outputs = this.getNode().outputs;
+        let input = this.getNode().input;
+
+        if (this.scope.value_txt !== undefined && this.scope.value_txt !== "") {
+            this.putData(this.scope.value_txt, this.scope.value_txt);
+            this.getNode().addControl(
+                    new MultiplicityControl(this.emitter, this.scope.value_txt)
+                    );
+            /// using addOutput instead of outputs.set(key, new Output(...))
+            this.getNode().addOutput(
+                    new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true)
+                    );
+            console.log(outputs);
+            this.scope.value_txt = "";
+            this.emitter.trigger("process");
+            this.getNode()._alight.scan();
+        }
+    }
+
+    change_txt(e) {
+        this.scope.value_txt = e.target.value;
+        this.update();
+    }
+
+    update() {
+        if (this.key) {
+            this.putData(this.key, this.scope.value);
+        }
+        this.emitter.trigger('process');
+        this._alight.scan();
+    }
+
+    mounted() {
+    }
+
+    setValue(val) {
+        this.scope.value = val;
+        this._alight.scan();
+    }
+}
+
 class MessageMatchComponent extends Rete.Component {
 
     constructor() {
@@ -244,17 +307,17 @@ class MessageMatchComponent extends Rete.Component {
     }
 
     builder(node) {
-        var inp1 = new Rete.Input('messageMatchText', "Текст", stringSocket);
-        var out1 = new Rete.Output('messageMatchTrue', "Да", stringSocket, true);
-        var out2 = new Rete.Output('messageMatchFalse', "Нет", stringSocket, true);
+//        var out1 = new Rete.Output('radiooutput', "Вариант ответа", stringSocket);
+        var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
         var ctrl = new InputControl('regexp');
 
-        return node
+        this.nd = node
+                .addControl(new ButtonControl(this.editor, 'btn', "+"))
                 .addControl(ctrl)
-                .addInput(inp1)
-                .addOutput(out1)
-                .addOutput(out2);
+                .addInput(inp1);
+        return this.nd;
     }
+
     worker(node, inputs) {
         var text = inputs[0] ? inputs[0][0] : "";
 
@@ -368,13 +431,14 @@ class ContinueComponent extends Rete.Component {
 }
 
 const JsRenderPlugin = {
-  install(editor, params = {}){
-    editor.on('rendercontrol', ({el, control}) => {
-      if(control.render && control.render !== 'js') return;
-      
-      control.handler(el, editor);
-    });
-  }
+    install(editor, params = {}){
+        editor.on('rendercontrol', ({el, control}) => {
+            if (control.render && control.render !== 'js')
+                return;
+
+            control.handler(el, editor);
+        });
+    }
 }
 
 var container = document.querySelector('#rete');
