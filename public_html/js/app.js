@@ -303,7 +303,7 @@ class MessageMatchComponent extends Rete.Component {
         super("Ожидаемое сообщение");
         this.task = {
             outputs: ['option', 'option']
-        }
+        };
     }
 
     builder(node) {
