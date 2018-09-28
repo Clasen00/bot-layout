@@ -237,42 +237,30 @@ class ButtonControl extends Rete.Control {
 
 class MatchSelectControl extends Rete.Control {
 
-    constructor(emitter, key, text) {
+    constructor(emitter, key, text, name) {
         super();
         this.emitter = emitter;
         this.key = key;
         this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = "Button";
         //создать темплейт для селекта
-        this.template = '<select><option> Пункт 1 </option></select><input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+        this.template = '\
+            <select name="keyz_{{name}}">\n\
+                <option value="1"> Выберите ожидаемую категорию ответа </option> \n\
+                <option @click="change_btn($event)" value="{{text}}"> {{text}} </option> \n\
+            </select>';
 
         this.scope = {
             value_text: "",
             text: text,
+            name: name,
             change_txt: this.change_txt.bind(this),
             change_btn: this.change_btn.bind(this)
         };
     }
 
     change_btn(e) {
-        let controls = this.getNode().controls;
-        let outputs = this.getNode().outputs;
-        let input = this.getNode().input;
-
-        if (this.scope.value_txt !== undefined && this.scope.value_txt !== "") {
-            this.putData(this.scope.value_txt, this.scope.value_txt);
-            this.getNode().addControl(
-                    new MultiplicityControl(this.emitter, this.scope.value_txt)
-                    );
-            /// using addOutput instead of outputs.set(key, new Output(...))
-            this.getNode().addOutput(
-                    new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true)
-                    );
-            console.log(outputs);
-            this.scope.value_txt = "";
-            this.emitter.trigger("process");
-            this.getNode()._alight.scan();
-        }
+        console.log(e);
     }
 
     change_txt(e) {
@@ -309,7 +297,7 @@ class MessageMatchComponent extends Rete.Component {
     builder(node) {
 //        var out1 = new Rete.Output('radiooutput', "Вариант ответа", stringSocket);
         var inp1 = new Rete.Input('radioinput', "Запрос", stringSocket);
-        var ctrl = new InputControl('regexp');
+        var ctrl = new MatchSelectControl(this.editor, 'regexp', '.*hello.*', 'matchingChanges');
 
         this.nd = node
                 .addControl(new ButtonControl(this.editor, 'btn', "+"))
