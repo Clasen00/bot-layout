@@ -249,7 +249,8 @@ class MatchSelectControl extends Rete.Control {
                 <option value="1"> Выберите ожидаемую категорию ответа </option> \n\
                 <option @click="change_btn($event)" value="{{text}}"> {{text}} </option> \n\
             </select>';
-
+//todo не сохраняются данные в json
+//соделать ^ и перестать разрабатывать на время, вернуться к кнопкам
         this.scope = {
             value_text: "",
             text: text,
