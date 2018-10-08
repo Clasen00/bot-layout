@@ -245,7 +245,7 @@ class MatchSelectControl extends Rete.Control {
         this.type = "Button";
         //создать темплейт для селекта
         this.template = '\
-            <select name="keyz_{{name}}">\n\
+            <select name="{{keyz}}_{{name}}">\n\
                 <option value="1"> Выберите ожидаемую категорию ответа </option> \n\
                 <option @click="change_btn($event)" value="{{text}}"> {{text}} </option> \n\
             </select>';
@@ -254,6 +254,7 @@ class MatchSelectControl extends Rete.Control {
         this.scope = {
             value_text: "",
             text: text,
+            keyz: this.keyz,
             name: name,
             change_txt: this.change_txt.bind(this),
             change_btn: this.change_btn.bind(this)
