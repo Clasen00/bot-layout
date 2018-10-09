@@ -99,6 +99,7 @@ class MultiplicityControl extends Rete.Control {
     del_btn(e) {
         var node = this.getNode();
         node.controls.delete(this.scope.value);
+        node.outputs.delete(this.scope.value);
         this.emitter.trigger('process');
         this.getNode()._alight.scan();
     }
@@ -187,6 +188,7 @@ class ButtonControl extends Rete.Control {
         this.scope = {
             value_text: "",
             text: text,
+            id: this.keyz,
             change_txt: this.change_txt.bind(this),
             change_btn: this.change_btn.bind(this)
         };
@@ -204,7 +206,7 @@ class ButtonControl extends Rete.Control {
                     );
             /// using addOutput instead of outputs.set(key, new Output(...))
             this.getNode().addOutput(
-                    new Rete.Output(this.keyz, this.scope.value_txt, stringSocket, true)
+                    new Rete.Output(this.scope.value_txt, this.scope.value_txt, stringSocket, true)
                     );
             console.log(outputs);
             this.scope.value_txt = "";
