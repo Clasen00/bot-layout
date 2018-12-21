@@ -83,6 +83,7 @@ class MultiplicityControl extends Rete.Control {
         this.key = key;
         this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = type;
+        //данные не уходят из data
         this.template = `<input type="${type}" :readonly="readonly" :value="value" @input="change($event)"/><button :id="id" class="node_submit" type="button" @click="del_btn($event)" />-`;
 
         this.scope = {
@@ -248,7 +249,7 @@ class MatchSelectControl extends Rete.Control {
         //создать темплейт для селекта
         this.template = '\
             <select name="{{keyz}}_{{name}}">\n\
-                <option value="1"> Выберите ожидаемую категорию ответа </option> \n\
+                <option disabled> Выберите ожидаемую категорию ответа </option> \n\
                 <option @click="change_btn($event)" value="{{text}}"> {{text}} </option> \n\
             </select>';
 //todo не сохраняются данные в json
@@ -292,7 +293,7 @@ class MatchSelectControl extends Rete.Control {
 class MessageMatchComponent extends Rete.Component {
 
     constructor() {
-        super("Ожидаемое сообщение");
+        super("Ожидаемая категория ответа");
         this.task = {
             outputs: ['option', 'option']
         };
