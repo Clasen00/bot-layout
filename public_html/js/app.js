@@ -183,7 +183,7 @@ class ButtonControl extends Rete.Control {
         this.key = key;
         this.keyz = Math.random().toString(36).substr(2, 9);
         this.type = "Button";
-        this.template = '<input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" :value="value_txt" @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
+        this.template = '<input id="node_short_txt" placeholder="Введите ожидаемую реплику" type="text" value @input="change_txt($event)"/> <button class="node_submit" type="button" @click="change_btn($event)" />{{text}}';
 
         this.scope = {
             value_text: "",
@@ -249,12 +249,12 @@ class MatchSelectControl extends Rete.Control {
         this.template = '\
             <select name="{{keyz}}_{{name}}">\n\
                 <option value="1"> Выберите ожидаемую категорию ответа </option> \n\
-                <option @click="change_btn($event)" value="{{text}}"> {{text}} </option> \n\
+                <option @click="change_btn($event)" value="{{value}}"> {{text}} </option> \n\
             </select>';
 //todo не сохраняются данные в json
 //соделать ^ и перестать разрабатывать на время, вернуться к кнопкам
         this.scope = {
-            value_text: "",
+            value: "",
             text: text,
             keyz: this.keyz,
             name: name,
@@ -272,15 +272,24 @@ class MatchSelectControl extends Rete.Control {
         this.update();
     }
 
+    change(e) {
+        this.scope.value = this.type === 'number' ? +e.target.value : e.target.value;
+        this.update();
+        this.onChange();
+    }
+
     update() {
         if (this.key) {
             this.putData(this.key, this.scope.value);
         }
+
         this.emitter.trigger('process');
         this._alight.scan();
     }
 
     mounted() {
+        this.scope.value = this.getData(this.key);
+        this.update();
     }
 
     setValue(val) {
@@ -508,7 +517,7 @@ async function initClickNode() {
 
 }
 
-function getConsoleData(editor, data) {
+async function getConsoleData(editor, data) {
     const target = document.getElementById('save');
     const htmlConsole = document.getElementById('console');
 
